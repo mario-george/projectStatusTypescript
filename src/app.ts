@@ -299,6 +299,26 @@ class ProjectList implements DragTarget {
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
   assignedProjects: Project[] = [];
+
+  @AutoBind
+dragLeave(event: DragEvent): void {
+
+  let ul = this.element.querySelector('ul')!
+ul.classList.remove("droppable")
+  
+}
+@AutoBind
+dragOver(event: DragEvent): void {
+  let ul = this.element.querySelector('ul')!
+  ul.classList.add("droppable")
+    
+}
+@AutoBind
+drop(event: DragEvent): void {
+  
+}
+
+
   constructor(private type: "active" | "finished") {
     this.hostElement = document.getElementById("app")! as HTMLDivElement;
     this.templateElement = document.getElementById(
@@ -312,6 +332,7 @@ class ProjectList implements DragTarget {
 
     this.attach();
     this.renderItems();
+    this.configure()
     projectStateInstance.addListener((projects: Project[]) => {
       const ul = document.getElementById(`${this.type}-projects-list`)!;
       ul.innerHTML = "";
@@ -322,6 +343,11 @@ class ProjectList implements DragTarget {
         }
       }
     });
+  }
+  private configure(){
+    document.addEventListener('drop',this.drop)
+    document.addEventListener('dragover',this.dragOver)
+    document.addEventListener('dragleave',this.dragLeave)
   }
   private renderProjects(project: Project): void {
     const p = new ProjectItem(project,this.element.querySelector('ul')!.id)
