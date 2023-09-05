@@ -1,17 +1,107 @@
+enum ProjectStatus {
+  Active,
+  Finished,
+}
+// we add abstract so we cant instaniate it but only use it for inheritance of classes
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
+  templateEl: HTMLTemplateElement;
+  hostEl: T;
+  element: U;
+  constructor(
+    templateId: string,
+    hostElementId: string,
+    public insertAtStart: boolean,
+    newElementId?: string
+  ) {
+    // newElementId is optional if you want to add an id to the inserted Element
+    this.templateEl = document.getElementById(
+      templateId
+    )! as HTMLTemplateElement;
+    this.hostEl = document.getElementById(hostElementId)! as T;
+    let importedNode = document.importNode(this.templateEl.content, true);
+    this.element = importedNode.firstElementChild as U;
+    if (newElementId) {
+      this.element.id = newElementId;
+    }
+    this.attach(insertAtStart);
+  }
+
+  private attach(insertAtStart: boolean) {
+    this.hostEl.insertAdjacentElement(
+      insertAtStart ? "afterbegin" : "beforeend",
+      this.element
+    );
+  }
+// this will insure that any class that inherits this will need to apply both of these abstract methods
+  abstract configure(): void;
+  abstract renderContent(): void;
+}
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  private project:Project
+
+  pEl:HTMLParagraphElement; 
+  h3El:HTMLHeadingElement
+  h2El:HTMLHeadingElement
+  
+  constructor(project:Project,hostId:string) {
+    super("single-project", hostId,false);
+    this.project = project;
+    // console.log(id)
+    this.pEl=this.element.querySelector('p')! as HTMLParagraphElement;
+    this.h3El=this.element.querySelector('h3')! as HTMLHeadingElement;
+    this.h2El=this.element.querySelector('h2')! as HTMLHeadingElement;
+this.configure();
+this.renderContent();
+  }
+  configure(): void {
+
+  }
+  renderContent(): void {
+    this.pEl.textContent=this.project.description;
+    this.h2El.textContent=this.project.title;
+    this.h3El.textContent=this.project.people.toString();
+  }
+}
+
+class Project {
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
+}
+type Listener = (projects: Project[]) => void;
 class ProjectState {
   // we will make using static only one instace from this class
   private static instance: ProjectState;
+
   private constructor() {}
 
-  private projects: any[] = [];
+  private projects: Project[] = [];
+  listeners: Listener[] = [];
   addProject(title: string, description: string, people: number) {
-    const newProject = {
-      id: Math.random().toString(),
+    const project = new Project(
+      Math.random().toString(),
       title,
       description,
       people,
-    };
-    this.projects.push(newProject);
+      ProjectStatus.Active
+    );
+    // const newProject = {
+    //   id: Math.random().toString(),
+    //   title,
+    //   description,
+    //   people,
+    // };
+    this.projects.push(project);
+    for (const listener of this.listeners) {
+      // execute each listener with the new array
+      listener(this.projects.slice());
+      // slice return a copy of the array because arrays are ref types
+    }
+
     return;
     // return newProject;
   }
@@ -21,6 +111,9 @@ class ProjectState {
     }
     this.instance = new ProjectState();
     return this.instance;
+  }
+  addListener(listener: Listener) {
+    this.listeners.push(listener);
   }
 }
 
@@ -111,7 +204,6 @@ class ProjectInput {
     this.peopleInput = this.element.querySelector(
       "#people"
     )! as HTMLInputElement;
-
     this.config();
     this.attach();
   }
@@ -130,7 +222,12 @@ class ProjectInput {
       console.log(this.titleInput.value);
       console.log(this.peopleInput.value);
       console.log(this.descriptionInput.value);
-      this.clearInputFields();
+      projectStateInstance.addProject(
+        this.titleInput.value,
+        this.descriptionInput.value,
+        +this.peopleInput.value
+      );
+      console.log(this.clearInputFields());
     } else {
       return;
     }
@@ -191,7 +288,7 @@ class ProjectList {
   element: HTMLElement;
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
-
+  assignedProjects: Project[] = [];
   constructor(private type: "active" | "finished") {
     this.hostElement = document.getElementById("app")! as HTMLDivElement;
     this.templateElement = document.getElementById(
@@ -202,8 +299,30 @@ class ProjectList {
     // section eleement
     this.element = importedNode.firstElementChild as HTMLElement;
     this.element.id = `${this.type}-projects`;
+
     this.attach();
     this.renderItems();
+    projectStateInstance.addListener((projects: Project[]) => {
+      const ul = document.getElementById(`${this.type}-projects-list`)!;
+      ul.innerHTML = "";
+
+      for (let p of projects) {
+        if (this.type == "active") {
+          this.renderProjects(p);
+        }
+      }
+    });
+  }
+  private renderProjects(project: Project): void {
+    const p = new ProjectItem(project,this.element.querySelector('ul')!.id)
+    p.renderContent()
+    // console.log(this.element.id)
+    // const ul = this.element.querySelector("ul")! as HTMLUListElement;
+    // const el = document.createElement("li");
+    // el.innerHTML = "";
+    // el.textContent = project.title;
+    // console.log(project);
+    // ul.appendChild(el);
   }
   private attach() {
     this.hostElement.insertAdjacentElement("beforeend", this.element);
