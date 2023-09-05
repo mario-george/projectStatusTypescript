@@ -2,6 +2,16 @@ enum ProjectStatus {
   Active,
   Finished,
 }
+
+interface Dragable{
+  dragStartHandler(event:DragEvent):void;
+  dragEndHandler(event:DragEvent):void;
+}
+interface DragTarget{
+  dragOver(event:DragEvent):void;
+  drop(event:DragEvent):void;
+  dragLeave(event:DragEvent):void;
+}
 // we add abstract so we cant instaniate it but only use it for inheritance of classes
 abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   templateEl: HTMLTemplateElement;
@@ -36,7 +46,7 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   abstract configure(): void;
   abstract renderContent(): void;
 }
-class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> implements Dragable {
   private project:Project
 
   pEl:HTMLParagraphElement; 
@@ -284,7 +294,7 @@ class ProjectInput {
   }
 }
 
-class ProjectList {
+class ProjectList implements DragTarget {
   element: HTMLElement;
   templateElement: HTMLTemplateElement;
   hostElement: HTMLDivElement;
