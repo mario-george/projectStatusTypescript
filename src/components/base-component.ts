@@ -1,4 +1,4 @@
-namespace App {
+
 
     // we add abstract so we cant instaniate it but only use it for inheritance of classes
 export abstract class Component<T extends HTMLElement, U extends HTMLElement> {
@@ -37,4 +37,3 @@ export abstract class Component<T extends HTMLElement, U extends HTMLElement> {
     abstract configure(): void;
     abstract renderContent(): void;
   }
-}

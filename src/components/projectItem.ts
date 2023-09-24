@@ -1,5 +1,8 @@
-namespace App {
-   export class ProjectItem
+import { Component } from "../components/base-component";
+import { Dragable } from "../models/dragDrop";
+import AutoBind from "../decorators/autobind";
+import { Project } from "../models/project";
+export class ProjectItem
   extends Component<HTMLUListElement, HTMLLIElement>
   implements Dragable
 {
@@ -43,6 +46,4 @@ namespace App {
         : (" Persons Assigned" as string);
     this.h3El.textContent = this.project.people.toString() + endOfSentence;
   }
-}
-
 }

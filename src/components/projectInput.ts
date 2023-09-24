@@ -1,5 +1,11 @@
-namespace App {
-  export class ProjectInput {
+
+import {validate,ValidationInterface} from '../util/validator'
+import AutoBind from '../decorators/autobind'
+import {projectStateInstance} from '../state/projectState'
+
+
+
+export class ProjectInput {
     templateEl: HTMLTemplateElement;
     element: HTMLFormElement;
     appEl: HTMLDivElement;
@@ -102,4 +108,4 @@ namespace App {
       this.peopleInput.value = "";
     }
   }
-}
+

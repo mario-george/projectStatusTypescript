@@ -1,4 +1,10 @@
-namespace App {
+
+import {Component} from '../components/base-component'
+import {ProjectItem} from '../components/projectItem'
+import {DragTarget} from '../models/dragDrop'
+import AutoBind from '../decorators/autobind'
+import {Project,ProjectStatus} from '..//models/project'
+import {projectStateInstance,ProjectState} from '../state/projectState'
   export class ProjectList
     extends Component<HTMLDivElement, HTMLElement>
     implements DragTarget
@@ -80,4 +86,4 @@ namespace App {
       h2.textContent = `${this.type.toUpperCase()} Projects`;
     }
   }
-}
+

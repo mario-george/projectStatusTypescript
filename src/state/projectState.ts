@@ -1,5 +1,4 @@
-namespace App {
-
+import { Project, ProjectStatus } from "../models/project";
 type Listener = (projects: Project[]) => void;
 export class ProjectState {
   // we will make using static only one instace from this class
@@ -61,5 +60,3 @@ export class ProjectState {
 }
 
 export const projectStateInstance = ProjectState.getInstance();
-
-}
